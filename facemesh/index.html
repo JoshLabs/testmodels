@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Emotion Decetion With face-api.js</title>
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="320" height="240"></canvas>
+        <canvas id="canvasOut" width="320" height="240"></canvas>
+        <div>
+            <input type="file" id="input" style="display: block; padding-bottom: 5px;" />
+            <div style="width: 48%; display: inline-block;">
+                <button onclick="detectFace()">Detect Face</button>
+                <p id="result" style="white-space: pre;">Results ...</span>
+            </div>
+            <div style="width: 48%; display: inline-block;">
+                <select onchange="changeBackend()" id="backend">
+                    <option value="webgl">WebGL</option>
+                    <option value="wasm">WASM</option>
+                </select>
+                <p id="backendText">Backend</p>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.1.0/dist/tf.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+        <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@3.1.0/dist/tf-backend-wasm.js"></script>
+
+        <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.7.0/dist/tf.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.5/dist/blazeface.min.js"></script>
+        <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.7.0/dist/tf-backend-wasm.js"></script> -->
+        
+        <script type="text/javascript"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
