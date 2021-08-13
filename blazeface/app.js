@@ -28,7 +28,7 @@ const detectFace = async () => {
 
     p.innerHTML = "Detecting ...";
     console.log('Loading model...')
-    const model = await blazeface.load({scoreThreshold: 0.9});
+    const model = await blazeface.load({scoreThreshold: 0.95});
     console.log('Loaded model...')
 
     var predictions;
