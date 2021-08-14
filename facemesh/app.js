@@ -17,12 +17,17 @@ console.log('Registered window.onload function ...');
 window.onload = function() {
     var input = document.getElementById('input');
     input.addEventListener('change', handleFiles, false);
+    loadImage("../test.jpeg");
 }
 
 function handleFiles(e) {
+  var url = URL.createObjectURL(e.target.files[0]);
+  loadImage(url);
+}
+
+function loadImage(url) {
     var ctx = canvas.getContext('2d');
     var ctxOut = canvasOut.getContext('2d');
-    var url = URL.createObjectURL(e.target.files[0]);
     var img = new Image();
     img.onload = function() {
         ctx.drawImage(img, 0, 0, 320, 240);

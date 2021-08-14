@@ -96,12 +96,17 @@
         window.onload = function() {
             var input = document.getElementById('input');
             input.addEventListener('change', handleFiles, false);
+            loadImage("../test.jpeg");
+        }
+        
+        function handleFiles(e) {
+            var url = URL.createObjectURL(e.target.files[0]);
+            loadImage(url);
         }
 
-        function handleFiles(e) {
+        function loadImage(url) {
             var ctx = canvas.getContext('2d');
             var ctxOut = canvasOut.getContext('2d');
-            var url = URL.createObjectURL(e.target.files[0]);
             var img = new Image();
             img.onload = function() {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -227,7 +232,7 @@
                     ctxOut.fillStyle = "rgb(0,0,0)";
                     ctxOut.fillText(text, x, y);
             }
-            
+
             document.getElementById("output").innerHTML = output; 
             console.log(output);
         }
