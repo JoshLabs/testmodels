@@ -5,10 +5,11 @@ const canvas = document.getElementById('canvas');
 const canvasOut = document.getElementById('canvasOut');
 
 console.log('Registered window.onload function ...');
-window.onload = function() {
+window.onload = async function() {
     var input = document.getElementById('input');
     input.addEventListener('change', handleFiles, false);
     loadImage("../test.jpeg");
+    await changeBackend();
 }
 
 function handleFiles(e) {

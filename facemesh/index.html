@@ -20,13 +20,6 @@
                 <button onclick="detectFace()">Detect Face</button>
                 <p id="result" style="white-space: pre;">Results ...</span>
             </div>
-            <div style="width: 48%; display: inline-block;">
-                <select onchange="changeBackend()" id="backend">
-                    <option value="webgl">WebGL</option>
-                    <option value="wasm">WASM</option>
-                </select>
-                <p id="backendText">Backend</p>
-            </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>

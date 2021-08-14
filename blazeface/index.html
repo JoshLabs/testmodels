@@ -20,10 +20,10 @@
                 <button onclick="detectFace()">Detect Face</button>
                 <p id="result" style="white-space: pre;">Results ...</span>
             </div>
-            <div style="width: 48%; display: inline-block;">
+            <div style="width: 48%; display: none;">
                 <select onchange="changeBackend()" id="backend">
+                    <option value="wasm" selected>WASM</option>
                     <option value="webgl">WebGL</option>
-                    <option value="wasm">WASM</option>
                 </select>
                 <p id="backendText">Backend</p>
             </div>
