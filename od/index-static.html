@@ -170,7 +170,11 @@
         // ];
 
         function ncnn_nanodet() {
-            var ctx = canvasOut.getContext('2d');
+            var ctx = canvas.getContext('2d');
+            var ctxOut = canvasOut.getContext('2d');
+            
+            ctxOut.clearRect(0, 0, canvas.width, canvas.height);
+            ctxOut.drawImage(canvas, 0, 0, canvas.width, canvas.height);
 
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -200,17 +204,15 @@
                     continue;
 
                 output += ', Class: ' + OBJECT_CLASS_LABELS[label] + ', Probability: ' + prob + "%";
-                document.getElementById("output").innerHTML = output; 
-                console.log(output);
 
-                ctx.strokeStyle = 'rgba(0, 0, 255, 0.6)';
-                ctx.strokeRect(bbox_x, bbox_y, bbox_w, bbox_h);
+                ctxOut.strokeStyle = 'rgba(0, 0, 255, 0.6)';
+                ctxOut.strokeRect(bbox_x, bbox_y, bbox_w, bbox_h);
 
                 var text = OBJECT_CLASS_LABELS[label] + " = " + parseFloat(prob).toFixed(2) + "%";
 
-                ctx.textBaseline = 'top';
-                var text_width = ctx.measureText(text).width;
-                var text_height = parseInt(ctx.font, 10);
+                ctxOut.textBaseline = 'top';
+                var text_width = ctxOut.measureText(text).width;
+                var text_height = parseInt(ctxOut.font, 10);
 
                 var x = bbox_x;
                 var y = bbox_y - text_height;
@@ -219,17 +221,20 @@
                 if (x + text_width > canvas.width)
                     x = canvas.width - text_width;
 
-                ctx.fillStyle = "rgb(255,255,255)";
-                ctx.fillRect(x, y, text_width, text_height);
-                ctx.font = "20pt Arial";
-                ctx.fillStyle = "rgb(0,0,0)";
-                ctx.fillText(text, x, y);
+                    ctxOut.fillStyle = "rgb(255,255,255)";
+                    ctxOut.fillRect(x, y, text_width, text_height);
+                    ctxOut.font = "20pt Arial";
+                    ctxOut.fillStyle = "rgb(0,0,0)";
+                    ctxOut.fillText(text, x, y);
             }
+            
+            document.getElementById("output").innerHTML = output; 
+            console.log(output);
         }
 
         var detectObject = function() {
-            // ctx.fillRect(0, 0, w, h);
-            // ctx.drawImage(video, 0, 0, w, h);
+            // ctxOut.fillRect(0, 0, w, h);
+            // ctxOut.drawImage(video, 0, 0, w, h);
             ncnn_nanodet()
         }
 
