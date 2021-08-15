@@ -33,11 +33,13 @@ const detectFace = async () => {
 
     p.innerHTML = "Detecting ...";
     console.log('Loading model...')
-    const model = await facemesh.load({
-        // scoreThreshold: 0.75,
-        maxContinuousChecks: 1,
-    });
-    console.log('Loaded model...')
+    const model = await faceLandmarksDetection.load(
+        faceLandmarksDetection.SupportedPackages.mediapipeFacemesh, {
+            shouldLoadIrisModel: false,
+            maxFaces: 3,
+            maxContinuousChecks: 0,
+        });
+    console.log('Loaded model...');
 
     var predictions;
     var t0, t1;
@@ -47,19 +49,20 @@ const detectFace = async () => {
         // Pass in a video stream (or an image, canvas, or 3D tensor) to obtain an
         // array of detected faces from the MediaPipe graph. If passing in a video
         // stream, a single prediction per frame will be returned.
-        predictions = await model.estimateFaces(canvas);
+        predictions = await model.estimateFaces({input: canvas, predictIrises: false});
         console.log(predictions);
         var t1 = performance.now()
     }
+
+    var text = "The face detection completed in " + (t1 - t0) + " ms and found " + predictions.length + " faces.<br><br>";
+
     if (predictions.length > 0) {
         var prediction = predictions[0]
-        var text = "The face detection completed in " + (t1 - t0) + " ms.<br>The face matched with predictions of " + prediction.faceInViewConfidence;
-        text += "<br><br>"
+        text += "The face matched with predictions of " + prediction.faceInViewConfidence;
+        text += "<br>"
         text += `<strong>TopLeft:</strong> = ${prediction.boundingBox.topLeft}<br>`
         text += `<strong>BottomRight:</strong> = ${prediction.boundingBox.bottomRight}<br>`
         renderPrediction(predictions);
-    } else {
-        var text = "No face found in the image.";
     }
     p.innerHTML = text;
 }

@@ -53,9 +53,12 @@ const detectFace = async () => {
         console.log(predictions);
         var t1 = performance.now()
     }
+
+    var text = "The face detection completed in " + (t1 - t0) + " ms and found " + predictions.length + " faces.<br><br>";
+
     if (predictions.length > 0) {
         var prediction = predictions[0]
-        var text = "The face detection completed in " + (t1 - t0) + " ms.<br>The face matched with predictions of " + predictions[0].probability[0];
+        text += "The face matched with predictions of " + prediction.faceInViewConfidence;
         text += "<br>"
         text += `<strong>Right Eye:</strong> <br> x = ${prediction.landmarks[0][0]}; y = ${prediction.landmarks[0][1]}<br>`
         text += `<strong>Left Eye:</strong> <br> x = ${prediction.landmarks[1][0]}; y = ${prediction.landmarks[1][1]}<br>`
@@ -64,8 +67,6 @@ const detectFace = async () => {
         text += `<strong>Right Ear:</strong> <br> x = ${prediction.landmarks[4][0]}; y = ${prediction.landmarks[4][1]}<br>`
         text += `<strong>Left Ear:</strong> <br> x = ${prediction.landmarks[5][0]}; y = ${prediction.landmarks[5][1]}<br>`
         renderPrediction(predictions);
-    } else {
-        var text = "No face found in the image.";
     }
     p.innerHTML = text;
 }
