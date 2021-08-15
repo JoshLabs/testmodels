@@ -104,3 +104,4 @@ code-jail
 # Tests
 ############################
 coverage
+test*/

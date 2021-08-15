@@ -6,10 +6,10 @@ const canvasOut = document.getElementById('canvasOut');
 
 console.log('Registered window.onload function ...');
 window.onload = async function() {
+    await changeBackend();
     var input = document.getElementById('input');
     input.addEventListener('change', handleFiles, false);
     loadImage("../test.jpeg");
-    await changeBackend();
 }
 
 function handleFiles(e) {
@@ -33,11 +33,9 @@ const detectFace = async () => {
 
     p.innerHTML = "Detecting ...";
     console.log('Loading model...')
-    const model = await blazeface.load({
-        scoreThreshold: 0.90,
-        // inputWidth: 256,
-        // inputHeight: 256,
-        // modelUrl: "http://localhost:8081/models/blazeface/blazeface.json"
+    const model = await facemesh.load({
+        // scoreThreshold: 0.75,
+        maxContinuousChecks: 1,
     });
     console.log('Loaded model...')
 
@@ -49,20 +47,16 @@ const detectFace = async () => {
         // Pass in a video stream (or an image, canvas, or 3D tensor) to obtain an
         // array of detected faces from the MediaPipe graph. If passing in a video
         // stream, a single prediction per frame will be returned.
-        predictions = await model.estimateFaces(canvas, false);
+        predictions = await model.estimateFaces(canvas);
         console.log(predictions);
         var t1 = performance.now()
     }
     if (predictions.length > 0) {
         var prediction = predictions[0]
-        var text = "The face detection completed in " + (t1 - t0) + " ms.<br>The face matched with predictions of " + predictions[0].probability[0];
-        text += "<br>"
-        text += `<strong>Right Eye:</strong> <br> x = ${prediction.landmarks[0][0]}; y = ${prediction.landmarks[0][1]}<br>`
-        text += `<strong>Left Eye:</strong> <br> x = ${prediction.landmarks[1][0]}; y = ${prediction.landmarks[1][1]}<br>`
-        text += `<strong>Nose:</strong> <br> x = ${prediction.landmarks[2][0]}; y = ${prediction.landmarks[2][1]}<br>`
-        text += `<strong>Mouth:</strong> <br> x = ${prediction.landmarks[3][0]}; y = ${prediction.landmarks[3][1]}<br>`
-        text += `<strong>Right Ear:</strong> <br> x = ${prediction.landmarks[4][0]}; y = ${prediction.landmarks[4][1]}<br>`
-        text += `<strong>Left Ear:</strong> <br> x = ${prediction.landmarks[5][0]}; y = ${prediction.landmarks[5][1]}<br>`
+        var text = "The face detection completed in " + (t1 - t0) + " ms.<br>The face matched with predictions of " + prediction.faceInViewConfidence;
+        text += "<br><br>"
+        text += `<strong>TopLeft:</strong> = ${prediction.boundingBox.topLeft}<br>`
+        text += `<strong>BottomRight:</strong> = ${prediction.boundingBox.bottomRight}<br>`
         renderPrediction(predictions);
     } else {
         var text = "No face found in the image.";
@@ -77,20 +71,20 @@ const renderPrediction = (predictions) => {
         ctxOut.drawImage(canvas, 0, 0);
 
         for (let i = 0; i < predictions.length; i++) {
-            const start = predictions[i].topLeft;
-            const end = predictions[i].bottomRight;
+            const start = predictions[i].boundingBox.topLeft;
+            const end = predictions[i].boundingBox.bottomRight;
             const size = [end[0] - start[0], end[1] - start[1]];
             ctxOut.fillStyle = "rgba(255, 0, 0, 0.5)";
             ctxOut.fillRect(start[0], start[1], size[0], size[1]);
 
-            const landmarks = predictions[i].landmarks;
+            // const landmarks = predictions[i].landmarks;
 
-            ctxOut.fillStyle = "blue";
-            for (let j = 0; j < landmarks.length; j++) {
-              const x = landmarks[j][0];
-              const y = landmarks[j][1];
-              ctxOut.fillRect(x, y, 5, 5);
-            }
+            // ctxOut.fillStyle = "blue";
+            // for (let j = 0; j < landmarks.length; j++) {
+            //   const x = landmarks[j][0];
+            //   const y = landmarks[j][1];
+            //   ctxOut.fillRect(x, y, 5, 5);
+            // }
         }
     }
 }
