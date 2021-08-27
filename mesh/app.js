@@ -56,10 +56,9 @@ const detectFace = async () => {
 
     var text = "The face detection completed in " + (t1 - t0) + " ms and found " + predictions.length + " faces.<br><br>";
 
-    if (predictions.length > 0) {
-        var prediction = predictions[0]
-        text += "The face matched with predictions of " + prediction.faceInViewConfidence;
-        text += "<br>"
+    for (k = 0; k < predictions.length ; k++) {
+        var prediction = predictions[k]
+        text += "<br>The face matched with predictions of " + prediction.faceInViewConfidence;
         text += `<strong>TopLeft:</strong> = ${prediction.boundingBox.topLeft}<br>`
         text += `<strong>BottomRight:</strong> = ${prediction.boundingBox.bottomRight}<br>`
         renderPrediction(predictions);

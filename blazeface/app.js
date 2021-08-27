@@ -37,7 +37,7 @@ const detectFace = async () => {
         scoreThreshold: 0.90,
         // inputWidth: 256,
         // inputHeight: 256,
-        // modelUrl: "http://localhost:8081/models/blazeface/blazeface.json"
+        modelUrl: "../models/blazeface/model.json"
     });
     console.log('Loaded model...')
 
