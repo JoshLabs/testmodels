@@ -1,0 +1,228 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="index.css?version=2.0.4">
+</head>
+
+<body>
+
+    <h1>webassembly mask</h1>
+    <div>
+        <canvas id="canvas" width="320" height="240"></canvas>
+        <canvas id="canvasOut" width="320" height="240"></canvas>
+    </div>
+    <input type="file" id="input" style="display: block; padding-bottom: 5px;" />
+    <div style="width: 48%; display: inline-block;">
+        <button onclick="detectObject()">Detect Object</button>
+        <p id="loaded" style="white-space: pre;">SIMD : ?</span>
+        <p id="output" style="white-space: pre;">Results:</span>
+    </div>
+
+    <br /><br />
+
+
+
+    <script src="wasmFeatureDetect.js?version=2.0.3"></script>
+
+    <script type='text/javascript'>
+        var Module = {};
+
+        var has_simd;
+        var has_threads;
+
+        var wasmModuleLoaded = false;
+        var wasmModuleLoadedCallbacks = [];
+
+        Module.onRuntimeInitialized = function() {
+            wasmModuleLoaded = true;
+            for (var i = 0; i < wasmModuleLoadedCallbacks.length; i++) {
+                wasmModuleLoadedCallbacks[i]();
+            }
+        }
+
+        wasmFeatureDetect.simd().then(simdSupported => {
+            has_simd = simdSupported;
+
+            wasmFeatureDetect.threads().then(threadsSupported => {
+                has_threads = threadsSupported;
+
+                if (has_simd & has_threads)
+                {
+                    yolo_module_name = 'yolo';
+                    document.getElementById('loaded').innerHTML = "SIMD+Threads : Enabled";
+                    console.log('simd&threads enabled.');
+                }
+                else
+                {
+                    yolo_module_name = 'ios/yolo-ios';
+                    document.getElementById('loaded').innerHTML = "SIMD+Threads : Disabled";
+                    console.log('cannot enable simd&threads.');
+                }
+
+                console.log('load ' + yolo_module_name);
+
+                var yolowasm = yolo_module_name + '.wasm';
+                var yolojs = yolo_module_name + '.js';
+
+                fetch(yolowasm)
+                    .then(response => response.arrayBuffer())
+                    .then(buffer => {
+                        Module.wasmBinary = buffer;
+                        var script = document.createElement('script');
+                        script.src = yolojs;
+                        script.onload = function() {
+                            console.log('Emscripten boilerplate loaded.');
+                        }
+                        document.body.appendChild(script);
+                    });
+
+            });
+        });
+
+
+        var dst = null;
+        var resultarray = null;
+        var resultbuffer = null;
+
+        const canvas = document.getElementById('canvas');
+        const canvasOut = document.getElementById('canvasOut');
+
+        console.log('Registered window.onload function ...');
+        window.onload = function() {
+            var input = document.getElementById('input');
+            input.addEventListener('change', handleFiles, false);
+            loadImage("../test.jpeg");
+        }
+
+        function handleFiles(e) {
+            var url = URL.createObjectURL(e.target.files[0]);
+            loadImage(url);
+        }
+
+        function loadImage(url) {
+            var ctx = canvas.getContext('2d');
+            var ctxOut = canvasOut.getContext('2d');
+            var img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctxOut.clearRect(0, 0, canvas.width, canvas.height);
+                ctxOut.drawImage(img, 0, 0, canvas.width, canvas.height);
+            }
+            img.src = url;
+
+            //Setup image memory
+            var id = ctxOut.getImageData(0, 0, canvas.width, canvas.height);
+            var d = id.data;
+
+            if (wasmModuleLoaded) {
+                mallocAndCallSFilter();
+            } else {
+                wasmModuleLoadedCallbacks.push(mallocAndCallSFilter);
+            }
+
+            function mallocAndCallSFilter() {
+                dst = _malloc(d.length);
+
+                // max 20 objects
+                resultarray = new Float32Array(6 * 20);
+                resultbuffer = _malloc(6 * 20 * Float32Array.BYTES_PER_ELEMENT);
+
+                HEAPF32.set(resultarray, resultbuffer / Float32Array.BYTES_PER_ELEMENT);
+
+                //console.log("What " + d.length);
+            }
+        };
+
+        var class_names = [
+            "background",
+            "No Mask", "Mask"
+        ];
+
+        var colors = [
+            "rgb( 255, 69,   0)",
+            "rgb( 32, 178, 170)"
+        ];
+
+        function ncnn_yolo() {
+            var ctx = canvas.getContext('2d');
+            var ctxOut = canvasOut.getContext('2d');
+            
+            ctxOut.clearRect(0, 0, canvas.width, canvas.height);
+            ctxOut.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+            ctxOut.font = '12px sans-serif'
+
+            HEAPU8.set(data, dst);
+
+            let t1 = performance.now();
+            var output = "";
+            _yolo_ncnn(dst, canvas.width, canvas.height, resultbuffer);
+            let t2 = performance.now();
+            output += `Time taken: ${(t2 - t1) } ms`;
+
+            // resultarray
+            var qaqarray = HEAPF32.subarray(resultbuffer / Float32Array.BYTES_PER_ELEMENT, resultbuffer / Float32Array.BYTES_PER_ELEMENT + 6 * 20);
+
+            var i;
+            for (i = 0; i < 20; i++) {
+                var label = qaqarray[i * 6 + 0];
+                var prob = qaqarray[i * 6 + 1];
+                var bbox_x = qaqarray[i * 6 + 2];
+                var bbox_y = qaqarray[i * 6 + 3];
+                var bbox_w = qaqarray[i * 6 + 4];
+                var bbox_h = qaqarray[i * 6 + 5];
+
+                if (label == -233)
+                    continue;
+
+                console.log('qaq ' + label + ' = ' + prob);
+                output += ', Class: ' + class_names[label] + ', Probability: ' + prob + "%";
+
+                //ctxOut.strokeStyle = colors[i % 19];
+                if (label == 1) {
+                    ctxOut.strokeStyle = colors[0];
+                    ctxOut.fillStyle = colors[0];
+                }
+                else {
+                    ctxOut.strokeStyle = colors[1];
+                    ctxOut.fillStyle = colors[1];
+                }
+
+                ctxOut.strokeRect(bbox_x, bbox_y, bbox_w, bbox_h);
+                ctxOut.lineWidth = 2;
+
+                var text = class_names[label] + ": " + parseFloat(prob * 100).toFixed(2) + "%";
+
+                ctxOut.textBaseline = 'top';
+                var text_width = ctxOut.measureText(text).width;
+                var text_height = parseInt(ctxOut.font, 10);
+
+                var x = bbox_x;
+                var y = bbox_y - text_height;
+                if (y < 0)
+                    y = 0;
+                if (x + text_width > canvas.width)
+                    x = canvas.width - text_width;
+
+                //ctxOut.fillStyle = "rgb(255,255,255)";
+                ctxOut.fillRect(x-1, y-2, text_width+4, text_height+2);
+                ctxOut.fillStyle = "rgb(255,255,255)";
+                ctxOut.fillText(text, x+1, y-2);
+            }
+
+            document.getElementById("output").innerHTML = output; 
+            console.log(output);
+        }
+
+        var detectObject = function() {
+            ncnn_yolo()
+        }
+
+    </script>
+
+</body>
+
+</html>
