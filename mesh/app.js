@@ -58,9 +58,10 @@ const detectFace = async () => {
 
     for (k = 0; k < predictions.length ; k++) {
         var prediction = predictions[k]
-        text += "<br>The face matched with predictions of " + prediction.faceInViewConfidence;
-        text += `<strong>TopLeft:</strong> = ${prediction.boundingBox.topLeft}<br>`
-        text += `<strong>BottomRight:</strong> = ${prediction.boundingBox.bottomRight}<br>`
+        text += `<br><strong>Prediction of Face ${k+1}</strong><br>`;
+        text += `The face matched with predictions of <strong>${prediction.faceInViewConfidence}</strong><br>`;
+        text += `<strong>TopLeft:</strong> = ${prediction.boundingBox.topLeft}<br>`;
+        text += `<strong>BottomRight:</strong> = ${prediction.boundingBox.bottomRight}<br>`;
         renderPrediction(predictions);
     }
     p.innerHTML = text;
