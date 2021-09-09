@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Blazeface Demo</title>
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="320" height="240"></canvas>
+        <canvas id="canvasOut" width="320" height="240"></canvas>
+        <div>
+            <input type="file" id="input" style="display: block; padding-bottom: 5px;" />
+            <div style="width: 48%; display: inline-block;">
+                <button onclick="detectFace()">Detect Face</button>
+                <p id="result" style="white-space: pre;">Results ...</span>
+            </div>
+            <div style="width: 48%;">
+                <label>Mesh Enabled</label><input type="checkbox" id="mesh" name="mesh" value="True" checked>
+                <label>Rotation Enabled</label><input type="checkbox" id="rotation" name="rotation" value="True">
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.js"></script>
+        
+        <script type="text/javascript"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
