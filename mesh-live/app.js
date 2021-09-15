@@ -24,8 +24,8 @@ const MESH_LEFT_EYE_INDEX = 174; // swapped the left & right indexes as we use r
 const MESH_RIGHT_EYE_INDEX = 145;
 const MESH_MOUTH_INDEX = 13;
 const MESH_NOSE_INDEX = 1;
-const MESH_LEFT_EAR_INDEX = 454;
-const MESH_RIGHT_EAR_INDEX = 234;
+const MESH_LEFT_EAR_INDEX = 356;
+const MESH_RIGHT_EAR_INDEX = 127;
 
 window.addEventListener('DOMContentLoaded', function() {
     var isStreaming = false;
@@ -247,15 +247,15 @@ function lookingRight(faceLandmarks) {
 }
 
 function lookingDown(faceLandmarks) {
-    // // Person is not looking down if the eye is above ear.
-    // if (
-    //     faceLandmarks.leftEye[1] < faceLandmarks.leftEar[1] ||
-    //     faceLandmarks.leftEye[1] < faceLandmarks.rightEar[1] ||
-    //     faceLandmarks.rightEye[1] < faceLandmarks.leftEar[1] ||
-    //     faceLandmarks.rightEye[1] < faceLandmarks.rightEar[1]
-    // ) {
-    //     return false;
-    // }
+    // Person is not looking down if the eye is above ear.
+    if (
+        faceLandmarks.leftEye[1] < faceLandmarks.leftEar[1] ||
+        faceLandmarks.leftEye[1] < faceLandmarks.rightEar[1] ||
+        faceLandmarks.rightEye[1] < faceLandmarks.leftEar[1] ||
+        faceLandmarks.rightEye[1] < faceLandmarks.rightEar[1]
+    ) {
+        return false;
+    }
 
     // Person is looking down if the distance between eye and ear is greater than the
     // distance between nose and mouth.
