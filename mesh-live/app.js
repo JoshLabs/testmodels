@@ -15,6 +15,16 @@ var model = null;
 var w = 320;
 var h = 240;
 
+var faceInViewConfidenceThreshold = 0.75 // i.e. 75%
+
+// Mesh Landmark indexes
+const MESH_LEFT_EYE_INDEX = 174; // swapped the left & right indexes as we use reflection in blazeface logic
+const MESH_RIGHT_EYE_INDEX = 145;
+const MESH_MOUTH_INDEX = 13;
+const MESH_NOSE_INDEX = 1;
+const MESH_LEFT_EAR_INDEX = 454;
+const MESH_RIGHT_EAR_INDEX = 234;
+
 window.addEventListener('DOMContentLoaded', function() {
     var isStreaming = false;
     switchcamerabtn = document.getElementById('switch-camera-btn');
@@ -126,13 +136,49 @@ const processFaceDetection = async () => {
         var prediction = predictions[k]
         text += `<br><strong>Prediction of Face ${k+1}:</strong><br>`;
         text += `The face matched with predictions of <strong>${prediction.faceInViewConfidence}</strong><br>`;
-        text += `<strong>TopLeft:</strong> = ${prediction.boundingBox.topLeft}<br>`;
-        text += `<strong>BottomRight:</strong> = ${prediction.boundingBox.bottomRight}<br>`;
+        text += `<strong>TopLeft:</strong> ${prediction.boundingBox.topLeft}<br>`;
+        text += `<strong>BottomRight:</strong> ${prediction.boundingBox.bottomRight}<br>`;
         renderPrediction(predictions);
+        text += `<br><strong>Detection Results:</strong> ${processDetectionResults(prediction)}<br><hr/>`;
     }
     p.innerHTML = text;
 
     scheduleVideoProctoring();
+}
+
+function processDetectionResults(prediction) {
+    if (prediction.faceInViewConfidence < faceInViewConfidenceThreshold) {
+        return "Face is not present in the frame";
+    }
+
+    var text = "Face is Present. ";
+
+    const faceLandmarks = {
+        rightEye: prediction.scaledMesh[MESH_RIGHT_EYE_INDEX],
+        leftEye: prediction.scaledMesh[MESH_LEFT_EYE_INDEX],
+        nose: prediction.scaledMesh[MESH_NOSE_INDEX],
+        mouth: prediction.scaledMesh[MESH_MOUTH_INDEX],
+        rightEar: prediction.scaledMesh[MESH_RIGHT_EAR_INDEX],
+        leftEar: prediction.scaledMesh[MESH_LEFT_EAR_INDEX]
+    }
+
+    if (faceOutsideView(faceLandmarks)) {
+        text += "Face is outside the view. ";
+    }
+
+    if (lookingLeft(faceLandmarks)) {
+        text += "Person is looking in left. ";
+    }
+
+    if (lookingRight(faceLandmarks)) {
+        text += "Person is looking in right. ";
+    }
+
+    if (lookingDown(faceLandmarks)) {
+        text += "Person is looking down. ";
+    }
+
+    return text;
 }
 
 console.log('Registered window.onload function ...');
@@ -166,4 +212,47 @@ const changeBackend = async () => {
     await tf.setBackend(x);
     var p = document.getElementById("backendText");
     p.innerHTML = x + " backend is successfully selected.";
+}
+
+function landmarkOutsideView(xCoordinate, yCoordinate) {
+    return (
+        (xCoordinate > canvas.width || xCoordinate < 0) ||
+        (yCoordinate > canvas.height || yCoordinate < 0)
+    );
+}
+
+// Returns true if the face is outside of the view area. We are checking only eyes &
+// nose landmarks to determine if the face is outside of the view area.
+function faceOutsideView(faceLandmarks) {
+    return landmarkOutsideView(faceLandmarks.leftEye[0], faceLandmarks.leftEye[1]) ||
+        landmarkOutsideView(faceLandmarks.rightEye[0], faceLandmarks.rightEye[1]) ||
+        landmarkOutsideView(faceLandmarks.nose[0], faceLandmarks.nose[1]);
+}
+
+function lookingLeft(faceLandmarks) {
+    return faceLandmarks.leftEye[0] > faceLandmarks.leftEar[0];
+}
+
+function lookingRight(faceLandmarks) {
+    return faceLandmarks.rightEye[0] < faceLandmarks.rightEar[0];
+}
+
+function lookingDown(faceLandmarks) {
+    // // Person is not looking down if the eye is above ear.
+    // if (
+    //     faceLandmarks.leftEye[1] < faceLandmarks.leftEar[1] ||
+    //     faceLandmarks.leftEye[1] < faceLandmarks.rightEar[1] ||
+    //     faceLandmarks.rightEye[1] < faceLandmarks.leftEar[1] ||
+    //     faceLandmarks.rightEye[1] < faceLandmarks.rightEar[1]
+    // ) {
+    //     return false;
+    // }
+
+    // Person is looking down if the distance between eye and ear is greater than the
+    // distance between nose and mouth.
+    const eyeToEarDistance = ((faceLandmarks.leftEye[1] + faceLandmarks.rightEye[1]) / 2) -
+        ((faceLandmarks.leftEar[1] + faceLandmarks.rightEar[1]) / 2);
+    const noseToMouthDistance = faceLandmarks.mouth[1] - faceLandmarks.nose[1];
+
+    return eyeToEarDistance > noseToMouthDistance;
 }
