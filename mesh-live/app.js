@@ -24,8 +24,8 @@ const MESH_LEFT_EYE_INDEX = 174; // swapped the left & right indexes as we use r
 const MESH_RIGHT_EYE_INDEX = 145;
 const MESH_MOUTH_INDEX = 13;
 const MESH_NOSE_INDEX = 1;
-const MESH_LEFT_EAR_INDEX = 356;
-const MESH_RIGHT_EAR_INDEX = 127;
+const MESH_LEFT_EAR_INDEX = 454;
+const MESH_RIGHT_EAR_INDEX = 234;
 
 window.addEventListener('DOMContentLoaded', function() {
     var isStreaming = false;
