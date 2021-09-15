@@ -17,6 +17,10 @@
     <body>
         <div>
             <button disabled id="switch-camera-btn" style="height:48px">Switch Camera</button>
+            <span style="float: right; padding: 15px;">
+                Refresh frame in seconds: <input type="number" id="refreshRate" name="refreshRate">
+                <button onclick="setRefreshRate()">Submit</button>
+            </span>
         </div>
         <div>
             <video id="video" playsinline autoplay width="320" height="240"></video>

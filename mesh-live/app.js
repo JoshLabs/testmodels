@@ -15,6 +15,8 @@ var model = null;
 var w = 320;
 var h = 240;
 
+var refreshRateInSec = 1;
+
 var faceInViewConfidenceThreshold = 0.75 // i.e. 75%
 
 // Mesh Landmark indexes
@@ -28,6 +30,7 @@ const MESH_RIGHT_EAR_INDEX = 234;
 window.addEventListener('DOMContentLoaded', function() {
     var isStreaming = false;
     switchcamerabtn = document.getElementById('switch-camera-btn');
+    document.getElementById("refreshRate").value = refreshRateInSec;
 
     // Wait until the video stream canvas play
     video.addEventListener('canplay', function(e) {
@@ -94,10 +97,16 @@ function capture() {
 
 var detectFromVideoFrameTimeout = null;
 
+function setRefreshRate() {
+    const oldRefreshRateInSec = refreshRateInSec;
+    refreshRateInSec = document.getElementById("refreshRate").value;
+    console.log(`Changed refresh rate to ${refreshRateInSec} from ${oldRefreshRateInSec}`);
+}
+
 function scheduleVideoProctoring() {
     detectFromVideoFrameTimeout = setTimeout(() => {
         detectFromVideoFrame();
-    }, 1000);
+    }, refreshRateInSec*1000);
 }
 
 function detectFromVideoFrame() {
