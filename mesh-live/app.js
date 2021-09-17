@@ -20,7 +20,7 @@ var refreshRateInSec = 1;
 var faceInViewConfidenceThreshold = 0.75 // i.e. 75%
 
 // Mesh Landmark indexes
-const MESH_LEFT_EYE_INDEX = 174; // swapped the left & right indexes as we use reflection in blazeface logic
+const MESH_LEFT_EYE_INDEX = 374; // swapped the left & right indexes as we use reflection in blazeface logic
 const MESH_RIGHT_EYE_INDEX = 145;
 const MESH_MOUTH_INDEX = 13;
 const MESH_NOSE_INDEX = 1;
@@ -205,8 +205,24 @@ const renderPrediction = (predictions) => {
             const start = predictions[i].boundingBox.topLeft;
             const end = predictions[i].boundingBox.bottomRight;
             const size = [end[0] - start[0], end[1] - start[1]];
-            ctxOut.fillStyle = "rgba(255, 0, 0, 0.5)";
+            ctxOut.fillStyle = "rgba(255, 0, 0, 0.4)";
             ctxOut.fillRect(start[0], start[1], size[0], size[1]);
+
+            const landmarks = [
+                predictions[i].scaledMesh[MESH_RIGHT_EYE_INDEX],
+                predictions[i].scaledMesh[MESH_LEFT_EYE_INDEX],
+                predictions[i].scaledMesh[MESH_NOSE_INDEX],
+                predictions[i].scaledMesh[MESH_MOUTH_INDEX],
+                predictions[i].scaledMesh[MESH_RIGHT_EAR_INDEX],
+                predictions[i].scaledMesh[MESH_LEFT_EAR_INDEX],
+            ];
+
+            ctxOut.fillStyle = 'blue';
+            for (let j = 0; j < landmarks.length; j++) {
+                const x = landmarks[j][0];
+                const y = landmarks[j][1];
+                ctxOut.fillRect(x, y, 5, 5);
+            }
         }
     }
 }
